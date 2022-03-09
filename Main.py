@@ -475,17 +475,10 @@ async def poke(ctx, member: nextcord.Member=None):
     else:
         await ctx.channel.send(ctx.message.author.mention + " just poked " + member.mention + "!")
         await ctx.channel.send(file=nextcord.File("img/poke.gif"))
-        
-@bot.command(pass_context = True)
-async def info(ctx, member: nextcord.Member=None):
-    if member == None:
-        member = ctx.message.author
-    info = "Joined guild on: " + member.joined_at.strftime("%A %B %d, %Y at %I:%M%p") + "\n"
-    info = info + "Account created on: " + member.created_at.strftime("%A %B %d, %Y at %I:%M%p")
-    em = nextcord.Embed(title='', description=info, colour=0xFF0000)
-    em.set_author(name=member.name, icon_url=member.avatar_url)
-    await ctx.channel.send(embed=em)
-    
+
+
+
+
     
 # Slash Command testing
 @bot.slash_command(name = "test", description= "This is a test slash command!", guild_ids=vtacGuild)
@@ -505,6 +498,14 @@ async def info(interaction: Interaction, user:nextcord.User = nextcord.SlashOpti
     em.set_author(name=user.display_name, icon_url=user.avatar.url)
     await interaction.response.send_message(embed=em)
 
+@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=vtacGuild)
+async def addquote(interaction: Interaction, 
+user: nextcord.User = nextcord.SlashOption(name="user", description="who said the funny?", required=True),
+quote: str = nextcord.SlashOption(name="quote", description="the funny thing someone said", required=True)
+):
+    register_quote(user, quote)
+    await interaction.response.send_message("Quote has been added :thumbsup:")
+    load_quotes()
 
 @bot.event
 async def on_message(message):
