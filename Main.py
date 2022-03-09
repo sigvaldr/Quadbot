@@ -448,20 +448,6 @@ async def pat(ctx, *, member: nextcord.Member = None):
     else:
         await ctx.channel.send(ctx.message.author.mention + " pats " + member.mention)
         await ctx.channel.send(file=nextcord.File("img/headpat.gif"))
-           
-@bot.command(pass_context = True)
-async def addquote(ctx, member: nextcord.Member = None, *, quote: str=None):
-    if member == None or quote == None:
-        await ctx.channel.send("You must mention a user and add a quote!")
-        await ctx.channel.send("Example: `!addquote @Iwan I love quotes`")
-    elif member.id == botID:
-        await ctx.channel.send("ERROR: UNAUTHORIZED! You are not allowed to quote me. Muahahaha!")
-        return
-    else:
-        register_quote(member, quote)
-        await ctx.message.delete()
-        await ctx.channel.send("Quote added :thumbsup:")
-        load_quotes()
        
 @bot.command()
 async def quote(ctx):
@@ -487,7 +473,6 @@ async def test(interaction: Interaction):
 
 @bot.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=vtacGuild)
 async def pfp(interaction: Interaction,user:nextcord.User = nextcord.SlashOption(name="user",description="Returns the profile picture of the user",required=True)):
-    #member = interaction.user
     await interaction.response.send_message(user.display_name + "'s profile picture:\n" + str(user.avatar.url))
 
 @bot.slash_command(name="info", description="Returns info of a user", guild_ids=vtacGuild)
@@ -506,6 +491,10 @@ quote: str = nextcord.SlashOption(name="quote", description="the funny thing som
     register_quote(user, quote)
     await interaction.response.send_message("Quote has been added :thumbsup:")
     load_quotes()
+
+@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=vtacGuild)
+async def quote(interaction: Interaction):
+    await interaction.response.send_message(get_quote())
 
 @bot.event
 async def on_message(message):
