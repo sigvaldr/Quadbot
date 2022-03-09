@@ -1,6 +1,0 @@
--Removed currency functions
--Added automatic assigning of NRP role to user on join
--Added Operator-only !terminate command
--Removed email-related functions
--Added on_join and on_remove functions and messages
--Added auto-message for new members

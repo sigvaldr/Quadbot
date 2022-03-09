@@ -1,1 +1,0 @@
-- Fixed cleverbot integration's message parsing
