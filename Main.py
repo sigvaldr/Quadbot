@@ -40,9 +40,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 connection = sqlite3.connect('KatyushaData.db')
 cur = connection.cursor()
-#Lists
-killResponses = ["%s 'accidentally' fell in a ditch... RIP >:)", "Oh, %s did that food taste strange? Maybe it was.....*poisoned* :wink:", "I didn't mean to shoot %s, I swear the gun was unloaded!", "Hey %s, do me a favor? Put this rope around your neck and tell me if it feels uncomfortable.", "*stabs %s* heh.... *stabs again*....hehe, stabby stabby >:D", "%s fell into the ocean whilst holding an anvil...well that was stupid."]
-userCommands = ["hug", "pat", "roll", "flip", "remind", "kill", "addquote", "quote", "pfp", "info", "version", "changelog"]
 
 welcome_message='''
 Welcome to Viking Tactical!
