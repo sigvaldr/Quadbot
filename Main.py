@@ -25,8 +25,6 @@ global iwanID
 iwanID = 142076624072867840
 global botID
 botID = 217108205627637761
-global vtacGuild
-vtacGuild = [183107747217145856]
 global VTAC
 VTAC = 183107747217145856
 global mainChannel
@@ -229,13 +227,8 @@ async def on_member_join(member):
     _chan = bot.get_guild(VTAC).get_channel(mainChannel)
     await member.send(welcome_message)
 
-
-
-### Admin Commands ###
-
 ### Officer Commands ###
-
-@bot.slash_command(name="promote", description="promote a user", guild_ids=vtacGuild)
+@bot.slash_command(name="promote", description="promote a user", guild_ids=[VTAC])
 async def promote(interaction: Interaction, member:nextcord.User = nextcord.SlashOption(name="user", description="User to promote", required=True)):
     sender = interaction.user
     if getRankClass(sender) == "subcommand" or "command" or "highcommand":
@@ -307,25 +300,7 @@ async def promote(interaction: Interaction, member:nextcord.User = nextcord.Slas
 
 
 ### User Commands ###
-
-# Test Command
-@bot.slash_command(name = "test", description= "This is a test slash command!", guild_ids=vtacGuild)
-async def test(interaction: Interaction):
-    await interaction.response.send_message("Hello World")
-
-@bot.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=vtacGuild)
-async def pfp(interaction: Interaction,member:nextcord.User = nextcord.SlashOption(name="user",description="Returns the profile picture of the user",required=True)):
-    await interaction.response.send_message(member.display_name + "'s profile picture:\n" + str(member.avatar.url))
-
-@bot.slash_command(name="info", description="Returns info of a user", guild_ids=vtacGuild)
-async def info(interaction: Interaction, member:nextcord.User = nextcord.SlashOption(name="user", description="Returns info of a user", required=True)):
-    info = "Joined guild on: " + member.joined_at.strftime("%A %B %d, %Y at %I:%M%p") + "\n"
-    info = info + "Account created on: " + member.created_at.strftime("%A %B %d, %Y at %I:%M%p")
-    em = nextcord.Embed(title='', description=info, colour=0xFF0000)
-    em.set_author(name=member.display_name, icon_url=member.avatar.url)
-    await interaction.response.send_message(embed=em)
-
-@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=vtacGuild)
+@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[VTAC])
 async def addquote(interaction: Interaction, 
 member: nextcord.User = nextcord.SlashOption(name="user", description="who said the funny?", required=True),
 quote: str = nextcord.SlashOption(name="quote", description="the funny thing someone said", required=True)
@@ -334,41 +309,10 @@ quote: str = nextcord.SlashOption(name="quote", description="the funny thing som
     await interaction.response.send_message("Quote has been added :thumbsup:")
     load_quotes()
 
-@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=vtacGuild)
+@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[VTAC])
 async def quote(interaction: Interaction):
     await interaction.response.send_message(get_quote())
 
-@bot.slash_command(name="poke", description="Poke someone!", guild_ids=vtacGuild)
-async def poke(interaction: Interaction,member:nextcord.User = nextcord.SlashOption(name="user",description="person to poke",required=True)):
-    await interaction.response.send_message(interaction.user.mention + " just poked " + member.mention + "!", file=nextcord.File("img/poke.gif"))
-
-@bot.slash_command(name="flip", description="Flip a coin", guild_ids=vtacGuild)
-async def flip(interaction: Interaction):
-    if random.choice([True, False]) == True:
-        await interaction.response.send_message("Heads!")
-    else:
-        await interaction.response.send_message("Tails!")
-
-@bot.slash_command(name="hug", description="A hug, perhaps?", guild_ids=vtacGuild)
-async def hug(interaction: Interaction):
-    if random.choice([True, False]) == True:
-        await interaction.response.send_message(":hugging:")
-    else:
-        await interaction.response.send_message("No hug for you, cyka")
-
-@bot.slash_command(name="roll", description="Roll n amount of n-sided dice", guild_ids=vtacGuild)
-async def roll(interaction: Interaction,
-dice: str = nextcord.SlashOption(name="ndn", description="NdN format only", required=True)
-):
-    try:
-        rolls, limit = map(int, dice.split('d'))
-    except Exception:
-        await interaction.response.send_message('Format has to be in NdN!')
-        return
-
-    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
-    await interaction.response.send_message(result)
-      
 
 # Message listner
 @bot.event
@@ -389,6 +333,14 @@ async def on_message(message):
 #Runtime, baby! Let's go!    
 print ('Getting ready...')
 print('Loading Katyusha v' + VERSION)
+print('Loading cogs...')
+
+modules = ["modules.commands.General"]
+
+if __name__ == "__main__":
+    for extension in modules:
+        bot.load_extension(extension)
+print("Cogs loaded")
 create_tables()
 load_quotes()
 getTokens()
