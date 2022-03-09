@@ -308,11 +308,6 @@ async def promote(interaction: Interaction, member:nextcord.User = nextcord.Slas
 
 ### User Commands ###
 
-# Test Command
-@bot.slash_command(name = "test", description= "This is a test slash command!", guild_ids=vtacGuild)
-async def test(interaction: Interaction):
-    await interaction.response.send_message("Hello World")
-
 @bot.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=vtacGuild)
 async def pfp(interaction: Interaction,member:nextcord.User = nextcord.SlashOption(name="user",description="Returns the profile picture of the user",required=True)):
     await interaction.response.send_message(member.display_name + "'s profile picture:\n" + str(member.avatar.url))
