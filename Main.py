@@ -1,4 +1,4 @@
- #####KatyushaV2#####
+#####KatyushaV2#####
 import nextcord
 from nextcord.ext import commands
 from nextcord.utils import get
@@ -16,9 +16,9 @@ import os
 import sqlite3
 
 ##Variables & objects##
-#Bot stuff
+# Bot stuff
 global VERSION
-VERSION = '4.0'
+VERSION = '4.0-alpha.2'
 global DEBUG
 DEBUG = True
 global iwanID
@@ -28,7 +28,7 @@ botID = 217108205627637761
 global VTAC
 VTAC = 183107747217145856
 global mainChannel
-mainChannel= 622144477233938482
+mainChannel = 622144477233938482
 global logChannel
 logChannel = 951018686867701790
 
@@ -39,7 +39,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 connection = sqlite3.connect('KatyushaData.db')
 cur = connection.cursor()
 
-welcome_message='''
+welcome_message = '''
 Welcome to Viking Tactical!
 If you'd like to apply for full-membership, you can submit an application at <https://vikingtactical.us/apply> (It usually takes 3-5 mins to complete).
 Someone will read your application and either accept or decline it. Either way, you'd receive an e-mail with the decision
@@ -52,34 +52,34 @@ Someone will read your application and either accept or decline it. Either way, 
 rank_martialed = 492467059830161428
 
 
-#Recruit Rank
+# Recruit Rank
 rank_rec = 469376345672253451
 
-#Enlisted Ranks
+# Enlisted Ranks
 rank_enlisted = 281727465968369665
 rank_spc = 632127911033569290
 rank_pfc = 492801780002979850
 rank_pvt = 574741329448534038
 
-#Sub-Command Ranks
+# Sub-Command Ranks
 rank_subcommand = 594343305987489808
 rank_sgm = 492802360616419338
 rank_sgt = 492802074140999691
 rank_cpl = 751656103741489263
 
-#Command Ranks
+# Command Ranks
 rank_command = 569278265857015818
 rank_cpt = 183109339991506945
 rank_1lt = 751656315029422170
 rank_2lt = 183110198188179456
 
-#High-Command Ranks
+# High-Command Ranks
 rank_highcommand = 577169836476465153
 rank_com = 183109993686499328
 rank_gen = 751656615966670889
 rank_col = 632122115096838144
 rank_maj = 751656507946303539
-#Rank Class Lists
+# Rank Class Lists
 rankClass_enlisted = [rank_pvt, rank_pfc, rank_spc]
 rankClass_subcommand = [rank_cpl, rank_sgt, rank_sgm]
 rankClass_command = [rank_2lt, rank_1lt, rank_cpt]
@@ -87,11 +87,12 @@ rankClass_highcommand = [rank_maj, rank_col, rank_gen, rank_com]
 ##########
 
 
-
-#Remove default help command
+# Remove default help command
 bot.remove_command('help')
 
-#Util funcs
+# Util funcs
+
+
 def getTokens():
     config = configparser.ConfigParser()
     if not os.path.isfile("tokens.cfg"):
@@ -99,7 +100,7 @@ def getTokens():
         print("Creating one now.")
         config.add_section("Tokens")
         config.set("Tokens", "Bot", "null")
-        with open ('tokens.cfg', 'w') as configfile:
+        with open('tokens.cfg', 'w') as configfile:
             config.write(configfile)
         print("File created.")
         print("Please edit tokens.cfg and then restart.")
@@ -108,7 +109,8 @@ def getTokens():
         config.read('tokens.cfg')
         global botToken
         botToken = config.get('Tokens', 'Bot')
-    
+
+
 def getRankClass(member):
     _rankClass = "null"
     for r in member.roles:
@@ -123,14 +125,16 @@ def getRankClass(member):
     debug("Rank Class check: " + _rankClass)
     return _rankClass
 
+
 def getRankObj(rank):
     bot.get_guild(VTAC).get_role(rank)
     return rank
 
 
 def getEmoji(id):
-	emoji = bot.get_emoji(id)
-	return emoji
+    emoji = bot.get_emoji(id)
+    return emoji
+
 
 def getPromoRank(member):
     for r in member.roles:
@@ -177,34 +181,39 @@ def getPromoRank(member):
     _curRank = bot.get_guild(VTAC).get_role(_curRank)
     _promoRank = bot.get_guild(VTAC).get_role(_promoRank)
     return _curRank, _promoRank
-    
+
+
 def debug(msg):
     if DEBUG == True:
         print("DEBUG: " + msg)
-    
+
+
 def create_tables():
     cur.execute('''CREATE TABLE IF NOT EXISTS quoteList
                      (QUOTES TEXT)''')
+
 
 def register_quote(usr, quote):
     quote = usr.name + ': "' + quote + '"'
     cur.execute("INSERT INTO quoteList (quotes) VALUES (?)", (quote,))
     connection.commit()
-    
+
+
 def load_quotes():
     print("Loading Quotes...")
     cur.execute('''SELECT * FROM quoteList''')
     global quotes
     quotes = cur.fetchall()
+
+
 def get_quote():
     quote = random.choice(quotes)
     quote = str(quote)
     quote = quote.strip("('',)")
     return quote
 
-    
 
-#Bot Events
+# Bot Events
 @bot.event
 async def on_ready():
     print("nextcord version: " + nextcord.__version__)
@@ -213,7 +222,8 @@ async def on_ready():
     print("------------------")
     _activity = nextcord.Game("Victory Through Comradery!")
     await bot.change_presence(activity=_activity)
-    
+
+
 @bot.event
 async def on_member_join(member):
     print(member.name + " has joined the guild...assigning rank...")
@@ -228,13 +238,16 @@ async def on_member_join(member):
     await member.send(welcome_message)
 
 ### Officer Commands ###
+
+
 @bot.slash_command(name="promote", description="promote a user", guild_ids=[VTAC])
-async def promote(interaction: Interaction, member:nextcord.User = nextcord.SlashOption(name="user", description="User to promote", required=True)):
+async def promote(interaction: Interaction, member: nextcord.User = nextcord.SlashOption(name="user", description="User to promote", required=True)):
     sender = interaction.user
     if getRankClass(sender) == "subcommand" or "command" or "highcommand":
         curRank, promoRank = getPromoRank(member)
-        debug("\n" + "Member: " + member.display_name + "\n" + "Rank: " + curRank.name + "\n" + "Promo rank: " + promoRank.name)
-        #Main Rank Work:
+        debug("\n" + "Member: " + member.display_name + "\n" + "Rank: " +
+              curRank.name + "\n" + "Promo rank: " + promoRank.name)
+        # Main Rank Work:
         debug("Adding Promo rank...")
         await member.add_roles(promoRank, reason="Promotion", atomic=True)
         debug("Removing old rank...")
@@ -263,7 +276,7 @@ async def promote(interaction: Interaction, member:nextcord.User = nextcord.Slas
             await member.remove_roles(_rank, reason="Promotion to High-Command", atomic=True)
         else:
             debug("No new class to process")
-        #Set new name prefix
+        # Set new name prefix
         if promoRank.id == rank_pvt:
             _nick = "Pvt. " + member.name
         elif promoRank.id == rank_pfc:
@@ -290,7 +303,7 @@ async def promote(interaction: Interaction, member:nextcord.User = nextcord.Slas
             _nick = "Gen. " + member.name
         await member.edit(nick=_nick, reason="Promotion")
 
-        #Post to log channel
+        # Post to log channel
         await interaction.response.send_message("```" + member.name + " has been promoted to " + promoRank.name + "```")
         await bot.get_guild(VTAC).get_channel(logChannel).send("```" + "\n" + sender.display_name + " has promoted " + member.name + " from " + curRank.name + " to " + promoRank.name + "\n" + "```")
 
@@ -298,16 +311,18 @@ async def promote(interaction: Interaction, member:nextcord.User = nextcord.Slas
         await interaction.response.send_message("ERROR: UNAUTHORIZED!")
 
 
-
 ### User Commands ###
 @bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=vtacGuild)
-async def addquote(interaction: Interaction, 
-member: nextcord.User = nextcord.SlashOption(name="user", description="who said the funny?", required=True),
-quote: str = nextcord.SlashOption(name="quote", description="the funny thing someone said", required=True)
-):
+async def addquote(interaction: Interaction,
+                   member: nextcord.User = nextcord.SlashOption(
+                       name="user", description="who said the funny?", required=True),
+                   quote: str = nextcord.SlashOption(
+                       name="quote", description="the funny thing someone said", required=True)
+                   ):
     register_quote(member, quote)
     await interaction.response.send_message("Quote has been added :thumbsup:")
     load_quotes()
+
 
 @bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[VTAC])
 async def quote(interaction: Interaction):
@@ -320,7 +335,7 @@ async def on_message(message):
     await bot.process_commands(message)
     debug("Passed cmd processing")
     if message.content.startswith("$embed "):
-        #Custom embeds
+        # Custom embeds
         if getRankClass(message.author) == "highcommand":
             payload = message.content.strip("$embed ")
             embed = Embed.from_dict(json.loads(payload))
@@ -329,9 +344,8 @@ async def on_message(message):
             await message.delete()
 
 
-    
-#Runtime, baby! Let's go!    
-print ('Getting ready...')
+# Runtime, baby! Let's go!
+print('Getting ready...')
 print('Loading Katyusha v' + VERSION)
 print('Loading cogs...')
 
