@@ -10,6 +10,7 @@ class General(commands.Cog):
     
     VTAC = 183107747217145856
 
+
     @nextcord.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=[VTAC])
     async def pfp(self, interaction:Interaction,member:nextcord.User = nextcord.SlashOption(name="user",description="Returns the profile picture of the user",required=True)):
         await interaction.response.send_message(member.display_name + "'s profile picture:\n" + str(member.avatar.url))
