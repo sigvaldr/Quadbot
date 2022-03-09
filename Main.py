@@ -497,6 +497,13 @@ async def pfp(interaction: Interaction,user:nextcord.User = nextcord.SlashOption
     #member = interaction.user
     await interaction.response.send_message(user.display_name + "'s profile picture:\n" + str(user.avatar.url))
 
+@bot.slash_command(name="info", description="Returns info of a user", guild_ids=vtacGuild)
+async def info(interaction: Interaction, user:nextcord.User = nextcord.SlashOption(name="user", description="Returns info of a user", required=True)):
+    info = "Joined guild on: " + user.joined_at.strftime("%A %B %d, %Y at %I:%M%p") + "\n"
+    info = info + "Account created on: " + user.created_at.strftime("%A %B %d, %Y at %I:%M%p")
+    em = nextcord.Embed(title='', description=info, colour=0xFF0000)
+    em.set_author(name=user.display_name, icon_url=user.avatar.url)
+    await interaction.response.send_message(embed=em)
 
 
 @bot.event
