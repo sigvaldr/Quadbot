@@ -18,7 +18,7 @@ import sqlite3
 ##Variables & objects##
 # Bot stuff
 global VERSION
-VERSION = '4.0-alpha.2'
+VERSION = '4.0-alpha.3'
 global DEBUG
 DEBUG = True
 global iwanID
@@ -312,7 +312,7 @@ async def promote(interaction: Interaction, member: nextcord.User = nextcord.Sla
 
 
 ### User Commands ###
-@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=vtacGuild)
+@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[VTAC])
 async def addquote(interaction: Interaction,
                    member: nextcord.User = nextcord.SlashOption(
                        name="user", description="who said the funny?", required=True),
@@ -349,7 +349,7 @@ print('Getting ready...')
 print('Loading Katyusha v' + VERSION)
 print('Loading cogs...')
 
-modules = ["modules.commands.General"]
+modules = ["modules.commands.General", "modules.Buttons"]
 
 if __name__ == "__main__":
     for extension in modules:
