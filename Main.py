@@ -377,7 +377,7 @@ print('Getting ready...')
 print('Loading Katyusha v' + VERSION)
 print('Loading cogs...')
 
-modules = ["modules.commands.General", "modules.Buttons"]
+modules = ["modules.commands.General", "modules.Buttons", "modules.ReactionRoles"]
 
 if __name__ == "__main__":
     for extension in modules:
