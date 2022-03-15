@@ -30,16 +30,20 @@ class Buttons(commands.Cog):
         self.bot = bot
     @commands.Cog.listener()
     async def on_message(self, message):
-        # Add Dashboard buttons
-        if message.content == "$dashboard":
-            em = nextcord.Embed(title="<:VTAC:282478642796298241> **VTAC Dashboard** <:VTAC:282478642796298241>")
-            await message.channel.send(embed=em, view=Dashboard())
-            await message.delete()
-        # Add ControlPanel buttons
-        elif message.content == "$sc-cp":
-            em = nextcord.Embed(title='__**VTAC SubCommand Control Panel**__', description="", colour=0xFF0000)
-            await message.channel.send(embed=em,view=SubCommandCP())
-            await message.delete()
+        try:
+            # Add Dashboard buttons
+            if message.content == "$dashboard":
+                em = nextcord.Embed(title="<:VTAC:282478642796298241> **VTAC Dashboard** <:VTAC:282478642796298241>")
+                await message.channel.send(embed=em, view=Dashboard())
+                await message.delete()
+            # Add ControlPanel buttons
+            elif message.content == "$sc-cp":
+                em = nextcord.Embed(title='__**VTAC SubCommand Control Panel**__', description="", colour=0xFF0000)
+                await message.channel.send(embed=em,view=SubCommandCP())
+                await message.delete()
+        except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in on_message for buttons", trace)
 
 
 def setup(bot):

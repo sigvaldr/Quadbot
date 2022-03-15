@@ -14,6 +14,7 @@ from datetime import datetime
 import configparser
 import os
 import sqlite3
+import traceback
 
 ##Variables & objects##
 # Bot stuff
@@ -31,6 +32,8 @@ global mainChannel
 mainChannel = 622144477233938482
 global logChannel
 logChannel = 951018686867701790
+global errorLogChan
+errorLogChan = 953125538254450728
 
 intents = nextcord.Intents.default()
 intents.members = True
@@ -212,6 +215,11 @@ def get_quote():
     quote = quote.strip("('',)")
     return quote
 
+async def errorMsg(msg, trace):
+    err = msg + "\n" + "```python" + "\n" + trace + "\n" + "```" + bot.get_guild(VTAC).get_role(rank_highcommand).mention
+    await bot.get_guild(VTAC).get_channel(errorLogChan).send(str(err))
+
+
 
 # Bot Events
 @bot.event
@@ -226,89 +234,97 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    print(member.name + " has joined the guild...assigning rank...")
-    _role = bot.get_guild(VTAC).get_role(rank_rec)
-    await member.add_roles(_role, reason="New member", atomic=True)
-    print("Recruit rank added to " + member.display_name)
-    print("Adding rank prefix...")
-    _nick = "Rec. " + member.name
-    await member.edit(nick=_nick, reason="New User")
-    print("Added prefix to " + member.display_name)
-    _chan = bot.get_guild(VTAC).get_channel(mainChannel)
-    await member.send(welcome_message)
+    try:
+        print(member.name + " has joined the guild...assigning rank...")
+        _role = bot.get_guild(VTAC).get_role(rank_rec)
+        await member.add_roles(_role, reason="New member", atomic=True)
+        print("Recruit rank added to " + member.display_name)
+        print("Adding rank prefix...")
+        _nick = "Rec. " + member.name
+        await member.edit(nick=_nick, reason="New User")
+        print("Added prefix to " + member.display_name)
+        _chan = bot.get_guild(VTAC).get_channel(mainChannel)
+        await member.send(welcome_message)
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in on_member_join event", trace)
 
 ### Officer Commands ###
 
 
 @bot.slash_command(name="promote", description="promote a user", guild_ids=[VTAC])
 async def promote(interaction: Interaction, member: nextcord.User = nextcord.SlashOption(name="user", description="User to promote", required=True)):
-    sender = interaction.user
-    if getRankClass(sender) == "subcommand" or "command" or "highcommand":
-        curRank, promoRank = getPromoRank(member)
-        debug("\n" + "Member: " + member.display_name + "\n" + "Rank: " +
-              curRank.name + "\n" + "Promo rank: " + promoRank.name)
-        # Main Rank Work:
-        debug("Adding Promo rank...")
-        await member.add_roles(promoRank, reason="Promotion", atomic=True)
-        debug("Removing old rank...")
-        await member.remove_roles(curRank, reason="Promotion", atomic=True)
-        if promoRank.id == rank_pvt:
-            debug("New class - Enlisted")
-            _rank = bot.get_guild(VTAC).get_role(rank_enlisted)
-            await member.add_roles(_rank, reason="Promotion", atomic=True)
-        elif promoRank.id == rank_cpl:
-            debug("New Class - Subcommand")
-            _rank = bot.get_guild(VTAC).get_role(rank_subcommand)
-            await member.add_roles(_rank, reason="Promotion to SubCommand", atomic=True)
-            _rank = bot.get_guild(VTAC).get_role(rank_enlisted)
-            await member.remove_roles(_rank, reason="Promotion to SubCommand", atomic=True)
-        elif promoRank.id == rank_2lt:
-            debug("New Class - Command")
-            _rank = bot.get_guild(VTAC).get_role(rank_command)
-            await member.add_roles(_rank, reason="Promotion to Command", atomic=True)
-            _rank = bot.get_guild(VTAC).get_role(rank_subcommand)
-            await member.remove_roles(_rank, reason="Promotion to Command", atomic=True)
-        elif promoRank.id == rank_maj:
-            debug("New Class - High-Command")
-            _rank = bot.get_guild(VTAC).get_role(rank_highcommand)
-            await member.add_roles(_rank, reason="Promotion to High-Command", atomic=True)
-            _rank = bot.get_guild(VTAC).get_role(rank_command)
-            await member.remove_roles(_rank, reason="Promotion to High-Command", atomic=True)
+    try:
+        sender = interaction.user
+        if getRankClass(sender) == "subcommand" or "command" or "highcommand":
+            curRank, promoRank = getPromoRank(member)
+            debug("\n" + "Member: " + member.display_name + "\n" + "Rank: " +
+                curRank.name + "\n" + "Promo rank: " + promoRank.name)
+            # Main Rank Work:
+            debug("Adding Promo rank...")
+            await member.add_roles(promoRank, reason="Promotion", atomic=True)
+            debug("Removing old rank...")
+            await member.remove_roles(curRank, reason="Promotion", atomic=True)
+            if promoRank.id == rank_pvt:
+                debug("New class - Enlisted")
+                _rank = bot.get_guild(VTAC).get_role(rank_enlisted)
+                await member.add_roles(_rank, reason="Promotion", atomic=True)
+            elif promoRank.id == rank_cpl:
+                debug("New Class - Subcommand")
+                _rank = bot.get_guild(VTAC).get_role(rank_subcommand)
+                await member.add_roles(_rank, reason="Promotion to SubCommand", atomic=True)
+                _rank = bot.get_guild(VTAC).get_role(rank_enlisted)
+                await member.remove_roles(_rank, reason="Promotion to SubCommand", atomic=True)
+            elif promoRank.id == rank_2lt:
+                debug("New Class - Command")
+                _rank = bot.get_guild(VTAC).get_role(rank_command)
+                await member.add_roles(_rank, reason="Promotion to Command", atomic=True)
+                _rank = bot.get_guild(VTAC).get_role(rank_subcommand)
+                await member.remove_roles(_rank, reason="Promotion to Command", atomic=True)
+            elif promoRank.id == rank_maj:
+                debug("New Class - High-Command")
+                _rank = bot.get_guild(VTAC).get_role(rank_highcommand)
+                await member.add_roles(_rank, reason="Promotion to High-Command", atomic=True)
+                _rank = bot.get_guild(VTAC).get_role(rank_command)
+                await member.remove_roles(_rank, reason="Promotion to High-Command", atomic=True)
+            else:
+                debug("No new class to process")
+            # Set new name prefix
+            if promoRank.id == rank_pvt:
+                _nick = "Pvt. " + member.name
+            elif promoRank.id == rank_pfc:
+                _nick = "Pfc. " + member.name
+            elif promoRank.id == rank_spc:
+                _nick = "Spc. " + member.name
+            elif promoRank.id == rank_cpl:
+                _nick = "Cpl. " + member.name
+            elif promoRank.id == rank_sgt:
+                _nick = "Sgt. " + member.name
+            elif promoRank.id == rank_sgm:
+                _nick = "Sgm. " + member.name
+            elif promoRank.id == rank_2lt:
+                _nick = "2lt. " + member.name
+            elif promoRank.id == rank_1lt:
+                _nick = "LT. " + member.name
+            elif promoRank.id == rank_cpt:
+                _nick = "Cpt. " + member.name
+            elif promoRank.id == rank_maj:
+                _nick = "Maj. " + member.name
+            elif promoRank.id == rank_col:
+                _nick = "Col. " + member.name
+            elif promoRank.id == rank_gen:
+                _nick = "Gen. " + member.name
+            await member.edit(nick=_nick, reason="Promotion")
+
+            # Post to log channel
+            await interaction.response.send_message("```" + member.name + " has been promoted to " + promoRank.name + "```")
+            await bot.get_guild(VTAC).get_channel(logChannel).send("```" + "\n" + sender.display_name + " has promoted " + member.name + " from " + curRank.name + " to " + promoRank.name + "\n" + "```")
+
         else:
-            debug("No new class to process")
-        # Set new name prefix
-        if promoRank.id == rank_pvt:
-            _nick = "Pvt. " + member.name
-        elif promoRank.id == rank_pfc:
-            _nick = "Pfc. " + member.name
-        elif promoRank.id == rank_spc:
-            _nick = "Spc. " + member.name
-        elif promoRank.id == rank_cpl:
-            _nick = "Cpl. " + member.name
-        elif promoRank.id == rank_sgt:
-            _nick = "Sgt. " + member.name
-        elif promoRank.id == rank_sgm:
-            _nick = "Sgm. " + member.name
-        elif promoRank.id == rank_2lt:
-            _nick = "2lt. " + member.name
-        elif promoRank.id == rank_1lt:
-            _nick = "LT. " + member.name
-        elif promoRank.id == rank_cpt:
-            _nick = "Cpt. " + member.name
-        elif promoRank.id == rank_maj:
-            _nick = "Maj. " + member.name
-        elif promoRank.id == rank_col:
-            _nick = "Col. " + member.name
-        elif promoRank.id == rank_gen:
-            _nick = "Gen. " + member.name
-        await member.edit(nick=_nick, reason="Promotion")
-
-        # Post to log channel
-        await interaction.response.send_message("```" + member.name + " has been promoted to " + promoRank.name + "```")
-        await bot.get_guild(VTAC).get_channel(logChannel).send("```" + "\n" + sender.display_name + " has promoted " + member.name + " from " + curRank.name + " to " + promoRank.name + "\n" + "```")
-
-    else:
-        await interaction.response.send_message("ERROR: UNAUTHORIZED!")
+            await interaction.response.send_message("ERROR: UNAUTHORIZED!")
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in promote command", trace)
 
 
 ### User Commands ###
@@ -319,14 +335,22 @@ async def addquote(interaction: Interaction,
                    quote: str = nextcord.SlashOption(
                        name="quote", description="the funny thing someone said", required=True)
                    ):
-    register_quote(member, quote)
-    await interaction.response.send_message("Quote has been added :thumbsup:")
-    load_quotes()
+    try:
+        register_quote(member, quote)
+        await interaction.response.send_message("Quote has been added :thumbsup:")
+        load_quotes()
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in addquote command", trace)
 
 
 @bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[VTAC])
 async def quote(interaction: Interaction):
-    await interaction.response.send_message(get_quote())
+    try:
+        await interaction.response.send_message(get_quote())
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in quote command", trace)
 
 
 # Message listner
@@ -337,11 +361,15 @@ async def on_message(message):
     if message.content.startswith("$embed "):
         # Custom embeds
         if getRankClass(message.author) == "highcommand":
-            payload = message.content.strip("$embed ")
-            embed = Embed.from_dict(json.loads(payload))
-            embed.timestamp = datetime.now()
-            await message.channel.send(embed=embed)
-            await message.delete()
+            try:
+                payload = message.content.strip("$embed ")
+                embed = Embed.from_dict(json.loads(payload))
+                embed.timestamp = datetime.now()
+                await message.channel.send(embed=embed)
+                await message.delete()
+            except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in $embed function", trace)
 
 
 # Runtime, baby! Let's go!
