@@ -19,7 +19,7 @@ import traceback
 ##Variables & objects##
 # Bot stuff
 global VERSION
-VERSION = '4.0-alpha.3'
+VERSION = '4.0-alpha.4'
 global DEBUG
 DEBUG = True
 global iwanID
