@@ -19,9 +19,15 @@ import traceback
 ##Variables & objects##
 # Bot stuff
 global VERSION
-VERSION = '1.0-alpha.1'
+VERSION = '1.0-alpha'
+global DEBUG
+DEBUG = True
 global botID
 botID = 1032489361033396244
+global GUILD
+GUILD = 1032040015078895616
+global admin_role
+admin_role = 1032040844888391730
 global logChannel
 logChannel = 1032107411466637332
 global errorLogChan
@@ -31,7 +37,7 @@ intents = nextcord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-connection = sqlite3.connect('QuadBotData.db')
+connection = sqlite3.connect('ScruffyData.db')
 cur = connection.cursor()
 
 # Remove default help command
@@ -45,9 +51,6 @@ def getTokens():
         print("Creating one now.")
         config.add_section("Tokens")
         config.set("Tokens", "Bot", "null")
-        config.add_section("Options")
-        config.set("Options", "GuildID", "null")
-        config.set("Options", "Debug", "off")
         with open('tokens.cfg', 'w') as configfile:
             config.write(configfile)
         print("File created.")
@@ -57,19 +60,20 @@ def getTokens():
         config.read('tokens.cfg')
         global botToken
         botToken = config.get('Tokens', 'Bot')
-        global GUILD_ID
-        GUILD_ID = config.get("Options", "GuildID")
-        global DEBUG
-        if config.get("Options", "Debug") is "on":
-            DEBUG = True
-        else:
-            DEBUG = False
-
 
 def getRankObj(rank):
-    bot.get_guild(GUILD_ID).get_role(rank)
+    bot.get_guild(GUILD).get_role(rank)
     return rank
 
+def isAdmin(member):
+    _admin = False
+    for r in member.roles:
+        if r.id == admin_role:
+            _admin = True
+    if _admin:
+        return True
+    else:
+        return False
 
 def getEmoji(id):
     emoji = bot.get_emoji(id)
@@ -84,16 +88,19 @@ def create_tables():
     cur.execute('''CREATE TABLE IF NOT EXISTS quoteList
                      (QUOTES TEXT)''')
 
+
 def register_quote(usr, quote):
     quote = usr.name + ': "' + quote + '"'
     cur.execute("INSERT INTO quoteList (quotes) VALUES (?)", (quote,))
     connection.commit()
+
 
 def load_quotes():
     print("Loading Quotes...")
     cur.execute('''SELECT * FROM quoteList''')
     global quotes
     quotes = cur.fetchall()
+
 
 def get_quote():
     quote = random.choice(quotes)
@@ -102,10 +109,9 @@ def get_quote():
     return quote
 
 async def errorMsg(msg, trace):
-    err = msg + "\n" + "```python" + "\n" + trace + "\n" + "```" + bot.get_guild(GUILD_ID)
-    await bot.get_guild(GUILD_ID).get_channel(errorLogChan).send(str(err))
-
-
+    #err = msg + "\n" + "```python" + "\n" + trace + "\n" + "```" + bot.get_guild(GUILD).get_role(admin_role).mention
+    err = msg + "\n" + "```python" + "\n" + trace + "\n" + "```"
+    await bot.get_guild(GUILD).get_channel(errorLogChan).send(str(err))
 
 # Bot Events
 @bot.event
@@ -114,72 +120,67 @@ async def on_ready():
     print("Logged in as: " + bot.user.name)
     print("ID: " + str(bot.user.id))
     print("------------------")
-    _activity = nextcord.Game("Quadopoly!")
+    _activity = nextcord.Game("Quadopoly")
     await bot.change_presence(activity=_activity)
 
 
-### User Commands ###
-@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[GUILD_ID])
-async def addquote(interaction: Interaction,
-                   member: nextcord.User = nextcord.SlashOption(
-                       name="user", description="who said the funny?", required=True),
-                   quote: str = nextcord.SlashOption(
-                       name="quote", description="the funny thing someone said", required=True)
-                   ):
-    try:
-        register_quote(member, quote)
-        await interaction.response.send_message("Quote has been added :thumbsup:")
-        load_quotes()
-    except Exception as err:
-                trace = traceback.format_exc()
-                await errorMsg("Error in addquote command", trace)
-
-
-@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[GUILD_ID])
-async def quote(interaction: Interaction):
-    try:
-        await interaction.response.send_message(get_quote())
-    except Exception as err:
-                trace = traceback.format_exc()
-                await errorMsg("Error in quote command", trace)
-
-
-@bot.slash_command(name="say", description="Sends a message as the bot", guild_ids=[GUILD_ID])
-async def say(interaction: Interaction,
-    chan: nextcord.TextChannel = nextcord.SlashOption(
-        name="channel", description="Channel to send message", required=True),
-    msg: str = nextcord.SlashOption(
-        name="message", description="message you'd like to send", required=True)
-):
-    try:
-        await chan.send(msg)
-        await interaction.response.send_message("Message sent :thumbsup:")
-    except Exception as err:
-        trace = traceback.format_exc()
-        await errorMsg("Error in say command", trace)
+# @bot.slash_command(name="say", description="Sends a message as the bot", guild_ids=[GUILD])
+# async def say(interaction: Interaction,
+#     chan: nextcord.TextChannel = nextcord.SlashOption(
+#         name="channel", description="Channel to send message", required=True),
+#     msg: str = nextcord.SlashOption(
+#         name="message", description="message you'd like to send", required=True)
+# ):
+#     try:
+#         await chan.send(msg)
+#         await interaction.response.send_message("Message sent :thumbsup:")
+#     except Exception as err:
+#         trace = traceback.format_exc()
+#         await errorMsg("Error in say command", trace)
 
 
 #Embed command
-@bot.slash_command(name="embed", description="Use discohook for help", guild_ids=[GUILD_ID])
-async def embed(interaction: Interaction,
-                chan: nextcord.TextChannel = nextcord.SlashOption(
-                    name="channel", description='Channel to send embed message', required=True),
-                data: str = nextcord.SlashOption(
-                    name='data', description='json data for embed', required=True)
-                ):
-    try:
-        embed = Embed.from_dict(json.loads(data))
-        embed.timestamp = datetime.now()
-        await chan.send(embed=embed)
-        await interaction.response.send_message("Embed Sent :thumbsup:")
-    except Exception as err:
-        trace = traceback.format_exc()
-        await errorMsg("Error in $embed function", trace)
+# @bot.slash_command(name="embed", description="Use discohook for help", guild_ids=[GUILD])
+# async def embed(interaction: Interaction,
+#                 chan: nextcord.TextChannel = nextcord.SlashOption(
+#                     name="channel", description='Channel to send embed message', required=True),
+#                 data: str = nextcord.SlashOption(
+#                     name='data', description='json data for embed', required=True)
+#                 ):
+#     try:
+#         embed = Embed.from_dict(json.loads(data))
+#         embed.timestamp = datetime.now()
+#         await chan.send(embed=embed)
+#         await interaction.response.send_message("Embed Sent :thumbsup:")
+#     except Exception as err:
+#         trace = traceback.format_exc()
+#         await errorMsg("Error in $embed function", trace)
+
+
+
+# Message listner
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+    debug("Passed cmd processing")
+    if message.content.startswith("$embed "):
+        # Custom embeds
+        if isAdmin(message.author):
+            try:
+                payload = message.content.strip("$embed ")
+                embed = Embed.from_dict(json.loads(payload))
+                embed.timestamp = datetime.now()
+                await message.channel.send(embed=embed)
+                await message.delete()
+            except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in $embed function", trace)
 
 
 # Runtime, baby! Let's go!
+print()
 print('Getting ready...')
-print('Loading QuadBot v' + VERSION)
+print('Loading RoboScruff v' + VERSION)
 print('Loading cogs...')
 
 modules = ["modules.commands.General"]
@@ -188,7 +189,7 @@ if __name__ == "__main__":
     for extension in modules:
         bot.load_extension(extension)
 print("Cogs loaded")
-create_tables()
-load_quotes()
+#create_tables()
+#load_quotes()
 getTokens()
 bot.run(botToken)
