@@ -144,6 +144,39 @@ async def quote(interaction: Interaction):
                 await errorMsg("Error in quote command", trace)
 
 
+@bot.slash_command(name="say", description="Sends a message as the bot", guild_ids=[GUILD_ID])
+async def say(interaction: Interaction,
+    chan: nextcord.TextChannel = nextcord.SlashOption(
+        name="channel", description="Channel to send message", required=True),
+    msg: str = nextcord.SlashOption(
+        name="message", description="message you'd like to send", required=True)
+):
+    try:
+        await chan.send(msg)
+        await interaction.response.send_message("Message sent :thumbsup:")
+    except Exception as err:
+        trace = traceback.format_exc()
+        await errorMsg("Error in say command", trace)
+
+
+#Embed command
+@bot.slash_command(name="embed", description="Use discohook for help", guild_ids=[GUILD_ID])
+async def embed(interaction: Interaction,
+                chan: nextcord.TextChannel = nextcord.SlashOption(
+                    name="channel", description='Channel to send embed message', required=True),
+                data: str = nextcord.SlashOption(
+                    name='data', description='json data for embed', required=True)
+                ):
+    try:
+        embed = Embed.from_dict(json.loads(data))
+        embed.timestamp = datetime.now()
+        await chan.send(embed=embed)
+        await interaction.response.send_message("Embed Sent :thumbsup:")
+    except Exception as err:
+        trace = traceback.format_exc()
+        await errorMsg("Error in $embed function", trace)
+
+
 # Runtime, baby! Let's go!
 print('Getting ready...')
 print('Loading QuadBot v' + VERSION)
