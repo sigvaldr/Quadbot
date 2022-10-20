@@ -157,6 +157,32 @@ async def on_ready():
 #         await errorMsg("Error in $embed function", trace)
 
 
+@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[VTAC])
+async def addquote(interaction: Interaction,
+                   member: nextcord.User = nextcord.SlashOption(
+                       name="user", description="who said the funny?", required=True),
+                   quote: str = nextcord.SlashOption(
+                       name="quote", description="the funny thing someone said", required=True)
+                   ):
+    try:
+        register_quote(member, quote)
+        await interaction.response.send_message("Quote has been added :thumbsup:")
+        load_quotes()
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in addquote command", trace)
+
+
+@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[VTAC])
+async def quote(interaction: Interaction):
+    try:
+        await interaction.response.send_message(get_quote())
+    except Exception as err:
+                trace = traceback.format_exc()
+                await errorMsg("Error in quote command", trace)
+
+
+
 
 # Message listner
 @bot.event
