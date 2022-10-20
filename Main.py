@@ -157,7 +157,7 @@ async def on_ready():
 #         await errorMsg("Error in $embed function", trace)
 
 
-@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[VTAC])
+@bot.slash_command(name="addquote", description="Adds a quote to the database", guild_ids=[GUILD])
 async def addquote(interaction: Interaction,
                    member: nextcord.User = nextcord.SlashOption(
                        name="user", description="who said the funny?", required=True),
@@ -173,7 +173,7 @@ async def addquote(interaction: Interaction,
                 await errorMsg("Error in addquote command", trace)
 
 
-@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[VTAC])
+@bot.slash_command(name="quote", description="Receive a random quote", guild_ids=[GUILD])
 async def quote(interaction: Interaction):
     try:
         await interaction.response.send_message(get_quote())
