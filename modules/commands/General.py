@@ -9,9 +9,9 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    VTAC = 183107747217145856
+    GUILD_ID = 1032040015078895616
 
-    @nextcord.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=[VTAC])
+    @nextcord.slash_command(name="pfp", description="Returns the profile picture of the user", guild_ids=[GUILD_ID])
     async def pfp(self, interaction: Interaction, member: nextcord.User = nextcord.SlashOption(name="user", description="Returns the profile picture of the user", required=True)):
         try:
             await interaction.response.send_message(member.display_name + "'s profile picture:\n" + str(member.avatar.url))
@@ -19,7 +19,7 @@ class General(commands.Cog):
                 trace = traceback.format_exc()
                 await errorMsg("Error in pfp command", trace)
 
-    @nextcord.slash_command(name="info", description="Returns info of a user", guild_ids=[VTAC])
+    @nextcord.slash_command(name="info", description="Returns info of a user", guild_ids=[GUILD_ID])
     async def info(self, interaction: Interaction, member: nextcord.User = nextcord.SlashOption(name="user", description="Returns info of a user", required=True)):
         try:
             info = "Joined guild on: " + \
@@ -33,7 +33,7 @@ class General(commands.Cog):
                 trace = traceback.format_exc()
                 await errorMsg("Error in info command", trace)
 
-    @nextcord.slash_command(name="poke", description="Poke someone!", guild_ids=[VTAC])
+    @nextcord.slash_command(name="poke", description="Poke someone!", guild_ids=[GUILD_ID])
     async def poke(self, interaction: Interaction, member: nextcord.User = nextcord.SlashOption(name="user", description="person to poke", required=True)):
         try:
             await interaction.response.send_message(interaction.user.mention + " just poked " + member.mention + "!", file=nextcord.File("img/poke.gif"))
@@ -41,7 +41,7 @@ class General(commands.Cog):
                 trace = traceback.format_exc()
                 await errorMsg("Error in poke command", trace)
 
-    @nextcord.slash_command(name="flip", description="Flip a coin", guild_ids=[VTAC])
+    @nextcord.slash_command(name="flip", description="Flip a coin", guild_ids=[GUILD_ID])
     async def flip(self, interaction: Interaction):
         try:
             if random.choice([True, False]) == True:
@@ -52,7 +52,7 @@ class General(commands.Cog):
                 trace = traceback.format_exc()
                 await errorMsg("Error in flip command", trace)
 
-    @nextcord.slash_command(name="hug", description="A hug, perhaps?", guild_ids=[VTAC])
+    @nextcord.slash_command(name="hug", description="A hug, perhaps?", guild_ids=[GUILD_ID])
     async def hug(self, interaction: Interaction):
         try:
             if random.choice([True, False]) == True:
@@ -63,7 +63,7 @@ class General(commands.Cog):
                 trace = traceback.format_exc()
                 await errorMsg("Error in hug command", trace)
 
-    @nextcord.slash_command(name="roll", description="Roll n amount of n-sided dice", guild_ids=[VTAC])
+    @nextcord.slash_command(name="roll", description="Roll n amount of n-sided dice", guild_ids=[GUILD_ID])
     async def roll(self, interaction: Interaction,
                    dice: str = nextcord.SlashOption(
                        name="ndn", description="NdN format only", required=True)
