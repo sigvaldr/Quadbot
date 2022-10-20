@@ -215,7 +215,7 @@ if __name__ == "__main__":
     for extension in modules:
         bot.load_extension(extension)
 print("Cogs loaded")
-#create_tables()
-#load_quotes()
+create_tables()
+load_quotes()
 getTokens()
 bot.run(botToken)
